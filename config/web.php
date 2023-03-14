@@ -11,7 +11,7 @@ $config = [
     'name' => 'EamusFumus',
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
-        '@npm'   => '@vendor/npm-asset',
+        '@npm' => '@vendor/npm-asset',
     ],
     'components' => [
         'request' => [
@@ -26,9 +26,9 @@ $config = [
             'identityClass' => 'app\models\User',
             'enableAutoLogin' => true,
         ],
-        'errorHandler' => [
-            'errorAction' => 'site/error',
-        ],
+        //'errorHandler' => [
+        //    'errorAction' => 'site/error',
+        //],
         'mailer' => [
             'class' => \yii\symfonymailer\Mailer::class,
             'viewPath' => '@app/mail',
@@ -65,8 +65,7 @@ if (YII_ENV_DEV) {
     $config['modules']['gii'] = [
         'class' => 'yii\gii\Module',
         // uncomment the following to add your IP if you are not connecting from localhost.
-//        'allowedIPs' => ['127.0.0.1', '::1'],
-//        'allowedIPs' => ['*'],
+        'allowedIPs' => VaultSecret::getSecret('YII_ALLOW_IP', ['127.0.0.1']),
     ];
 }
 
