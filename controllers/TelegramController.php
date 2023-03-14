@@ -2,12 +2,14 @@
 
 namespace app\controllers;
 
+use app\forms\FormUsers;
 use KebaCorp\VaultSecret\VaultSecret;
 use TelegramBot\Api\BotApi;
 use TelegramBot\Api\Client;
 use TelegramBot\Api\Exception;
 use TelegramBot\Api\Types\Update;
 use yii\web\Controller;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use Yii;
 
@@ -30,55 +32,104 @@ class TelegramController extends Controller
     }
 
     /**
-     * @return array
+     * @throws NotFoundHttpException
      */
     public function actionHook()
     {
-        try {
-            $token = VaultSecret::getSecret('TELEGRAM_TOKEN');
-            $bot = new Client(VaultSecret::getSecret($token));
-            $tgBot = new BotApi(VaultSecret::getSecret($token));
+        if (Yii::$app->getRequest()->isPost) {
+            try {
+                $token = VaultSecret::getSecret('TELEGRAM_TOKEN');
+                $hook = new Client($token);
+                $bot = new BotApi($token);
+
+                $formUsers = new FormUsers();
+
+                // Команда "start" - Регистрация в боте
+                $hook->command('start', function ($message) use ($hook, $bot, $formUsers) {
+                    $formUsers->setChat($message->getChat());
+                    $chatId = $message->getChat()->getId();
+                    $messageId = $message->getMessageId();
+                    $bot->deleteMessage($chatId, $messageId);
+
+                    if (!$formUsers->inBase($chatId)) {
+                        $sendResult = $hook->sendMessage($chatId, $this->getMessage('MESSAGE_START_1'));
+                        $messageId = $sendResult->getMessageId();
+
+                        sleep(2);
+                        $bot->editMessageText($chatId, $messageId, $this->getMessage('MESSAGE_START_2'));
+
+                        sleep(2);
+                        $bot->editMessageText($chatId, $messageId, $this->getMessage('MESSAGE_START_3'));
+
+                        sleep(2);
+                        $formUsers->save();
+                        $bot->editMessageText($chatId, $messageId, $formUsers->getMessage());
+                    } else {
+                        $bot->deleteMessage($chatId, $messageId);
+                    }
 
 
-            // Команда "start" - регистрация в боте и подпись на уведомления
-            $bot->command('start', function ($message) use ($bot) {
-                $bot->sendMessage($message->getChat()->getId(), 'Фиксирую информацию');
-            });
+                });
 
-            // Команда "active" - хочу или не хочу получать уведомления
-            $bot->command('active', function ($message) use ($bot)  {
-                $bot->sendMessage($message->getChat()->getId(), '');
-            });
+                // Команда "active" - Изменить глобальную активность получения уведомлений
+                $hook->command('active', function ($message) use ($hook, $bot, $formUsers) {
+                    $chatId = $message->getChat()->getId();
+                    $messageId = $message->getMessageId();
+                    $bot->deleteMessage($chatId, $messageId);
 
-            // Отправить предложение покурить
-            $bot->command('smoke', function ($message) use ($bot) {
-                $bot->sendMessage($message->getChat()->getId(), '');
-            });
+                    if ($formUsers->inBase($chatId)) {
+                        $sendResult = $hook->sendMessage($chatId, $this->getMessage('MESSAGE_ACTIVE_1'));
+                        $messageId = $sendResult->getMessageId();
 
-            $bot->command('info', function ($message) use ($bot) {
-                $bot->sendMessage($message->getChat()->getId(), '');
-            });
+                        sleep(2);
+                        $isActive = $formUsers->getActive($chatId);
+                        $bot->editMessageText($chatId, $messageId, $this->getMessage('MESSAGE_ACTIVE_2_' . $isActive));
 
+                        sleep(2);
+                        $bot->editMessageText($chatId, $messageId, $this->getMessage('MESSAGE_ACTIVE_3'));
 
-            $bot->on(function (Update $update) use ($bot) {
-                $message = $update->getMessage();
-                $text = $message->getText();
+                        sleep(2);
+                        $bot->editMessageText($chatId, $messageId, $this->getMessage('MESSAGE_ACTIVE_4'));
 
-//                if (preg_match('/Согласиться/', $text, $match)) {}
-                //if (preg_match('/Отказаться/', $text, $match)) {}
-                //if (preg_match('/Позже/', $text, $match)) {}
-                //$bot->sendMessage($message->getChat()->getId(), $message->getText());
+                        sleep(2);
+                        $formUsers->updateActive($chatId);
+                        $bot->editMessageText($chatId, $messageId, $formUsers->getMessage());
+                    } else {
+                        $bot->sendMessage($chatId, $this->getMessage('MESSAGE_ERROR'));
+                    }
+                });
 
-            }, function () {
-                return true;
-            });
+                // Команда "info" - Получить информацию о том, сколько раз участвовал в перекурах
+                $hook->command('info', function ($message) use ($hook, $bot) {
+                    $chatId = $message->getChat()->getId();
+                    $messageId = $message->getMessageId();
+                    $bot->deleteMessage($chatId, $messageId);
+                });
 
-            $bot->run();
-        } catch (Exception $e) {
-            // Сюда вообще не попадает бот, даже когда появляется какой-то Exception
-            Yii::error($e->getMessage(), 'telegram');
+                // Команда "smoke" - Предложить пойти покурить всем активным пользоватеклям
+                $hook->command('smoke', function ($message) use ($hook, $bot) {
+                    $chatId = $message->getChat()->getId();
+                    $messageId = $message->getMessageId();
+                    $bot->deleteMessage($chatId, $messageId);
+                });
+
+                $hook->run();
+            } catch (Exception $e) {
+                $e->getMessage();
+            }
+        } else {
+            throw new NotFoundHttpException('Данной страницы не существует');
         }
     }
 
+    /**
+     * @param $message
+     * @param array $context
+     * @return string
+     */
+    protected function getMessage($message, array $context = [])
+    {
+        return Yii::t('telegram', $message, $context);
+    }
 
 }
