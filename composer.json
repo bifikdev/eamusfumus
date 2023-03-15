@@ -13,7 +13,6 @@
         "yiisoft/yii2-httpclient": "*",
         "yiisoft/yii2-redis": "*",
         "yiisoft/yii2-queue": "*",
-        "aki/yii2-bot-telegram": "*",
         "telegram-bot/api": "2.3.22",
         "kebacorp/vaultsecret": "^1.1.0",
         "yii2tech/filedb": "1.0.6"
@@ -38,6 +37,9 @@
         "process-timeout": 1800,
         "fxp-asset": {
             "enabled": false
+        },
+        "platform": {
+            "php": "7.4.28"
         }
     },
     "scripts": {
