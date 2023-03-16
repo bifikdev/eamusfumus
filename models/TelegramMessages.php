@@ -7,7 +7,7 @@ use Yii;
 /**
  * This is the model class for table "telegramMessages".
  *
- * @property int $idUpdate Уникальный ID записи
+ * @property int $id Уникальный ID
  * @property int $idMessage Уникальный ID сообщения
  * @property int $idChat Уникальный ID чата
  * @property string|null $type Тип сообщения (public / private
@@ -33,11 +33,11 @@ class TelegramMessages extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['idUpdate', 'idMessage', 'idChat'], 'required'],
-            [['idUpdate', 'idMessage', 'idChat', 'date'], 'integer'],
+            [['id', 'idMessage', 'idChat'], 'required'],
+            [['id', 'idMessage', 'idChat', 'date'], 'integer'],
             [['type', 'entitiesType'], 'string', 'max' => 50],
             [['text'], 'string', 'max' => 1500],
-            [['idUpdate'], 'unique'],
+            [['id'], 'unique'],
             [['idChat'], 'exist', 'skipOnError' => true, 'targetClass' => TelegramUsers::class, 'targetAttribute' => ['idChat' => 'id']],
         ];
     }
@@ -48,7 +48,7 @@ class TelegramMessages extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'idUpdate' => Yii::t('models', 'MODEL_TELEGRAM_MESSAGES_ID_UPDATE'),
+            'id' => Yii::t('models', 'MODEL_TELEGRAM_MESSAGES_ID'),
             'idMessage' => Yii::t('models', 'MODEL_TELEGRAM_MESSAGES_ID_MESSAGE'),
             'idChat' => Yii::t('models', 'MODEL_TELEGRAM_MESSAGES_ID_CHAT'),
             'type' => Yii::t('models', 'MODEL_TELEGRAM_MESSAGES_TYPE'),
@@ -59,6 +59,8 @@ class TelegramMessages extends \yii\db\ActiveRecord
     }
 
     /**
+     * Gets query for [[IdChat0]].
+     *
      * @return \yii\db\ActiveQuery
      */
     public function getChat()

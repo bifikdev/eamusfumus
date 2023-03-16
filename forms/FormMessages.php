@@ -12,11 +12,6 @@ final class FormMessages extends Model
 {
 
     /**
-     * @var Update $update
-     */
-    protected $update;
-
-    /**
      * @var Message $message
      */
     protected $message;
@@ -25,15 +20,6 @@ final class FormMessages extends Model
      * @var Chat $chat
      */
     protected $chat;
-
-    /**
-     * @param Update $update
-     */
-    public function setUpdate(Update $update): void
-    {
-        $this->update = $update;
-        $this->setMessage($update->getMessage());
-    }
 
     /**
      * @param Message $message
@@ -57,12 +43,11 @@ final class FormMessages extends Model
      */
     public function save(): bool
     {
-        $update = $this->getUpdate();
         $message = $this->getMessage();
         $chat = $this->getChat();
 
         $model = new TelegramMessages();
-        $model->idUpdate = $update->getUpdateId();
+        $model->id = time();
 
         $model->idMessage = $message->getMessageId();
         $model->text = $message->getText();
