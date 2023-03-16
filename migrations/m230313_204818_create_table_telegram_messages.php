@@ -18,6 +18,7 @@ class m230313_204818_create_table_telegram_messages extends Migration
     {
         $this->createTable($this->tableName, [
             'id' => $this->primaryKey()->comment('Уникальный ID'),
+            'idSmokeRequest' => $this->integer()->comment('ID предложения'),
             // Данные из Message
             'idMessage' => $this->bigInteger()->notNull()->comment('Уникальный ID сообщения'),
             // Данные из Chat
@@ -30,7 +31,7 @@ class m230313_204818_create_table_telegram_messages extends Migration
         ], $this->tableOptions);
 
         $this->addForeignKey('fk-chat', $this->tableName, 'idChat', 'telegramUsers', 'id');
-
+        $this->addForeignKey('fk-smoke', $this->tableName, 'idSmokeRequest', 'telegramSmokeRequest', 'id');
     }
 
     /**
@@ -38,6 +39,7 @@ class m230313_204818_create_table_telegram_messages extends Migration
      */
     public function safeDown()
     {
+        $this->dropForeignKey('fk-smoke', $this->tableName);
         $this->dropForeignKey('fk-chat', $this->tableName);
 
         $this->dropTable($this->tableName);

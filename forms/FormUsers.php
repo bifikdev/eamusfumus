@@ -110,4 +110,16 @@ final class FormUsers extends Model
     {
         TelegramUsers::updateAll(['isReady' => 0]);
     }
+
+    /**
+     * @param int $filterId
+     * @return TelegramUsers
+     */
+    public function getUsers(int $filterId): TelegramUsers
+    {
+        return TelegramUsers::find()
+            ->where(['isActive' => 1])
+            ->andWhere(['NOT IN', 'id', [$filterId]])
+            ->all();
+    }
 }
