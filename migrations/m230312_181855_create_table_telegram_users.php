@@ -15,6 +15,7 @@ class m230312_181855_create_table_telegram_users extends Migration
     {
         $this->createTable($this->tableName, [
             'id' => $this->bigInteger()->notNull()->comment('ID чата бота с пользователем'),
+            'idMessage' => $this->bigInteger()->notNull()->comment('ID первого сообщения, в котором будет хранится информация'),
             'lastName' => $this->string(255)->null()->comment('Фамилия пользователя telegram'),
             'firstName' => $this->string(255)->null()->comment('Имя пользователя telegram'),
             'username' => $this->string(255)->null()->comment('Ник пользователя telegram'),

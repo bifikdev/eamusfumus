@@ -3,101 +3,111 @@
 namespace app\forms;
 
 use app\models\TelegramUsers;
+use TelegramBot\Api\Types\Update;
 use yii\base\Model;
-use Yii;
 
-class FormUsers extends Model
+final class FormUsers extends Model
 {
 
-    protected $chat;
-
+    /**
+     * @var Update $message
+     */
     protected $message;
 
-    public function save()
-    {
-        $chat = $this->getChat();
-        $model = $this->getModel();
-
-        // Если новый пользователь, то пишем сообщение
-        if ($model->isNewRecord) {
-            $model->id = $chat->getId();
-            $model->firstName = $chat->getFirstName();
-            $model->lastName = $chat->getLastName();
-            $model->username = $chat->getUsername();
-            if ($model->validate() && $model->save()) {
-                $this->setMessage(Yii::t('forms', 'FORM_USERS_SUCCESS'));
-                return true;
-            }
-            $this->setMessage(Yii::t('forms', 'ERROR_MESSAGE'));
-        }
-        // Если пользователь уже есть в БД - ничего не пишем
-        return false;
-    }
 
     /**
-     * @param $chatId
-     * @return bool
+     * @param $message
      */
-    public function updateActive($chatId)
-    {
-        $model = $this->getModel($chatId);
-        $model->isActive = ($model->isActive == 1) ? 0 : 1;
-        if ($model->validate() && $model->save()) {
-            $this->setMessage(Yii::t('forms', 'FORM_USERS_SUCCESS_ACTIVE_' . $model->isActive));
-            return true;
-        }
-        $this->setMessage(Yii::t('forms', 'ERROR_MESSAGE'));
-        return false;
-    }
-
-    /**
-     * @param $chatId
-     * @return int|null
-     */
-    public function getActive($chatId)
-    {
-        return $this->getModel($chatId)->isActive;
-    }
-
-    /**
-     * @param int|null $id
-     * @return TelegramUsers|null
-     */
-    protected function getModel(int $id = null)
-    {
-        return (is_null($id))
-            ? new TelegramUsers()
-            : TelegramUsers::findOne(['id' => $id]);
-    }
-
-    /**
-     * @param $chatId
-     * @return bool
-     */
-    public function inBase($chatId)
-    {
-        return TelegramUsers::find()->where(['id' => $chatId])->exists();
-    }
-
-    public function setChat($chat)
-    {
-        $this->chat = $chat;
-    }
-
-    protected function setMessage($message)
+    public function setMessage($message): void
     {
         $this->message = $message;
     }
 
-    protected function getChat()
+    /**
+     * @return bool
+     */
+    public function register(): bool
     {
-        return $this->chat;
+        $message = $this->message;
+        $chat = $message->getChat();
+
+        $model = new TelegramUsers();
+        $model->id = $chat->getId();
+        $model->idMessage = $message->getMessageId();
+        $model->lastName = $chat->getLastName();
+        $model->firstName = $chat->getFirstName();
+        $model->username = $chat->getUsername();
+        return ($model->validate() && $model->save());
     }
 
-    public function getMessage()
+    /**
+     * @param int $idChat
+     * @return bool
+     */
+    public function inBase(int $idChat): bool
     {
-        return $this->message;
+        return TelegramUsers::find()
+            ->where(['id' => $idChat])
+            ->exists();
+    }
+
+    /**
+     * Получить модель TelegramUsers по ID чата
+     *
+     * @param int $idChat
+     * @return TelegramUsers
+     */
+    public function getUser(int $idChat): TelegramUsers
+    {
+        return TelegramUsers::findOne(['id' => $idChat]);
+    }
+
+    /**
+     * Изменить маркер isActive пользователя
+     *
+     * @param int $id
+     * @return bool
+     */
+    public function changeActive(int $id): bool
+    {
+        $model = $this->getModel($id);
+        $model->isActive = ($model->isActive == 1) ? 0 : 1;
+        return ($model->validate() && $model->save());
+    }
+
+    /**
+     * Изменить маркер isReady пользователя
+     *
+     * @param int $id
+     * @return bool
+     */
+    public function changeReady(int $id): bool
+    {
+        $model = $this->getModel($id);
+        $model->isReady = ($model->isReady == 1) ? 0 : 1;
+        return ($model->validate() && $model->save());
+    }
+
+    /**
+     * Изменить id сообщение пользователя, которое служит для информации
+     *
+     * @param int $id
+     * @param int $messageId
+     * @return bool
+     */
+    public function changeMessageId(int $id, int $messageId): bool
+    {
+        $model = $this->getModel($id);
+        $model->idMessage = $messageId;
+        return ($model->validate() && $model->save());
     }
 
 
+    /**
+     * Обновить маркер isReady
+     */
+    public function startDay(): void
+    {
+        TelegramUsers::updateAll(['isReady' => 0]);
+    }
 }
