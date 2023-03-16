@@ -51,6 +51,18 @@ final class FormRequest extends Model
     }
 
     /**
+     * @return false|string
+     */
+    public static function getLast()
+    {
+        $model = TelegramSmokeRequest::find()->orderBy('id DESC')->one();
+        if ($model) {
+            return date('d.m.Y H:i:s', strtotime($model->date));
+        }
+        return \Yii::t('telegram', 'SMOKE_DATE_NO');
+    }
+
+    /**
      * @return Chat
      */
     protected function getChat(): Chat

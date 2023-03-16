@@ -70,7 +70,7 @@ final class FormUsers extends Model
      */
     public function changeActive(int $id): bool
     {
-        $model = $this->getModel($id);
+        $model = $this->getUser($id);
         $model->isActive = ($model->isActive == 1) ? 0 : 1;
         return ($model->validate() && $model->save());
     }
@@ -83,7 +83,7 @@ final class FormUsers extends Model
      */
     public function changeReady(int $id): bool
     {
-        $model = $this->getModel($id);
+        $model = $this->getUser($id);
         $model->isReady = ($model->isReady == 1) ? 0 : 1;
         return ($model->validate() && $model->save());
     }
@@ -97,7 +97,7 @@ final class FormUsers extends Model
      */
     public function changeMessageId(int $id, int $messageId): bool
     {
-        $model = $this->getModel($id);
+        $model = $this->getUser($id);
         $model->idMessage = $messageId;
         return ($model->validate() && $model->save());
     }
