@@ -5,7 +5,7 @@ use yii\db\Migration;
 /**
  * Class m230313_194818_create_table_telegram_messages
  */
-class m230313_194818_create_table_telegram_messages extends Migration
+class m230313_204818_create_table_telegram_messages extends Migration
 {
 
     public $tableName = '{{%telegramMessages%}}';
@@ -17,7 +17,7 @@ class m230313_194818_create_table_telegram_messages extends Migration
     public function safeUp()
     {
         $this->createTable($this->tableName, [
-            'id' => $this->bigInteger()->notNull()->comment('Уникальный ID'),
+            'id' => $this->primaryKey()->comment('Уникальный ID'),
             // Данные из Message
             'idMessage' => $this->bigInteger()->notNull()->comment('Уникальный ID сообщения'),
             // Данные из Chat
@@ -29,8 +29,6 @@ class m230313_194818_create_table_telegram_messages extends Migration
             'entitiesType' => $this->string(50)->null()->comment('Тип сообщения (bot_command / пустое значение)'),
         ], $this->tableOptions);
 
-        $this->addPrimaryKey('pk-id', $this->tableName, 'id');
-
         $this->addForeignKey('fk-chat', $this->tableName, 'idChat', 'telegramUsers', 'id');
 
     }
@@ -41,8 +39,6 @@ class m230313_194818_create_table_telegram_messages extends Migration
     public function safeDown()
     {
         $this->dropForeignKey('fk-chat', $this->tableName);
-
-        $this->dropPrimaryKey('pk-id');
 
         $this->dropTable($this->tableName);
     }
