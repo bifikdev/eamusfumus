@@ -3,12 +3,13 @@
 use KebaCorp\VaultSecret\VaultSecret;
 
 return [
-    'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:'
-        .'host='.VaultSecret::getSecret('MYSQL_HOSTNAME')
-        .';dbname='.VaultSecret::getSecret('MYSQL_BASENAME'),
-    'username' => VaultSecret::getSecret('MYSQL_USERNAME'),
-    'password' => VaultSecret::getSecret('MYSQL_PASSWORD'),
+    'class' => \yii\db\Connection::class,
+    'dsn' => sprintf('mysql:host=%s;dbname=%s',
+        VaultSecret::getSecret('MYSQL_HOSTNAME', 'localhost'),
+        VaultSecret::getSecret('MYSQL_BASENAME', 'database')
+    ),
+    'username' => VaultSecret::getSecret('MYSQL_USERNAME', 'root'),
+    'password' => VaultSecret::getSecret('MYSQL_PASSWORD', 'root'),
     'charset' => 'utf8',
 
     // Schema cache options (for production environment)

@@ -2,37 +2,41 @@
 
 use KebaCorp\VaultSecret\VaultSecret;
 
-
-$config = [
+return [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'bootstrap' => ['log', 'gii'],
     'language' => 'ru_RU',
-    'name' => 'EamusFumus',
+    'name' => VaultSecret::getSecret('YII_APP_NAME', ''),
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm' => '@vendor/npm-asset',
+    ],
+    'modules' => [
+        'gii' => [
+            'class' => \yii\gii\Module::class,
+            'allowedIPs' => VaultSecret::getSecret('YII_ALLOW_IP', ['127.0.0.1'])
+        ],
     ],
     'components' => [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => VaultSecret::getSecret('YII_COOKIE'),
-            'baseUrl' => '',
+            'baseUrl' => VaultSecret::getSecret('YII_APP_BASE_URL', ''),
         ],
         'cache' => [
-            'class' => 'yii\caching\FileCache',
+            'class' => \yii\caching\FileCache::class
         ],
         'user' => [
-            'identityClass' => 'app\models\User',
+            'class' => \app\models\User::class,
             'enableAutoLogin' => true,
         ],
-        //'errorHandler' => [
-        //    'errorAction' => 'site/error',
-        //],
+        'errorHandler' => [
+            'errorAction' => 'site/error'
+        ],
         'mailer' => [
             'class' => \yii\symfonymailer\Mailer::class,
             'viewPath' => '@app/mail',
-            // send all mails to a file by default.
             'useFileTransport' => true,
         ],
         'i18n' => [
@@ -51,20 +55,3 @@ $config = [
     ],
     'params' => require_once __DIR__ . '/config/_params.php',
 ];
-
-if (YII_ENV_DEV) {
-//    $config['bootstrap'][] = 'debug';
-//    $config['modules']['debug'] = [
-//        'class' => 'yii\debug\Module',
-//        'allowedIPs' => ['127.0.0.1', '::1'],
-//    ];
-
-    $config['bootstrap'][] = 'gii';
-    $config['modules']['gii'] = [
-        'class' => 'yii\gii\Module',
-        // uncomment the following to add your IP if you are not connecting from localhost.
-        'allowedIPs' => VaultSecret::getSecret('YII_ALLOW_IP', ['127.0.0.1']),
-    ];
-}
-
-return $config;
