@@ -3,11 +3,10 @@
 namespace app\controllers;
 
 use yii\web\Controller;
-use yii\web\NotFoundHttpException;
-use Yii;
 use yii\web\Response;
+use Yii;
 
-class SiteController extends Controller
+final class SiteController extends Controller
 {
 
     /**
@@ -15,7 +14,7 @@ class SiteController extends Controller
      * @return bool
      * @throws \yii\web\BadRequestHttpException
      */
-    public function beforeAction($action)
+    public function beforeAction($action): bool
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         return parent::beforeAction($action);
@@ -24,13 +23,12 @@ class SiteController extends Controller
     /**
      * @return array
      */
-    public function actionIndex()
+    final public function actionError():array
     {
+        $exception = Yii::$app->getErrorHandler()->exception;
         return [
-            'result' => false,
-            'message' => Yii::t('app', 'SITE_INDEX'),
+            'code' => $exception->statusCode,
+            'message' => $exception->getMessage(),
         ];
     }
-
-
 }
