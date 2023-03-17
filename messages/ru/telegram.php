@@ -16,4 +16,5 @@ return [
     'MESSAGE_START' => 'Регистрация в боте',
 
     'SMOKE_DATE_NO' => 'Еще не организован',
+    'SMOKE_WAIT' => '{icon} {username}'
 ];
