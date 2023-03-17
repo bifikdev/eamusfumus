@@ -8,6 +8,12 @@ use yii\base\Model;
 
 final class FormRequest extends Model
 {
+
+    /**
+     * @var int $Id
+     */
+    protected $id;
+
     /**
      * @var Chat $chat
      */
@@ -21,16 +27,24 @@ final class FormRequest extends Model
         $this->chat = $chat;
     }
 
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
     /**
-     * @return bool
+     * @return int
      */
-    public function save(): bool
+    public function save(): int
     {
         $chat = $this->getChat();
 
         $model = new TelegramSmokeRequest();
         $model->idChat = $chat->getId();
-        return ($model->validate() && $model->save());
+        if ($model->validate() && $model->save()) {
+            $this->setId($model->id);
+            return $this->getId();
+        }
     }
 
     /**
@@ -68,6 +82,14 @@ final class FormRequest extends Model
     protected function getChat(): Chat
     {
         return $this->chat;
+    }
+
+    /**
+     * @param int $id
+     */
+    protected function setId(int $id): void
+    {
+        $this->id = $id;
     }
 
 }

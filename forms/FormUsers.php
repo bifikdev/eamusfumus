@@ -113,13 +113,13 @@ final class FormUsers extends Model
 
     /**
      * @param int $filterId
-     * @return TelegramUsers
+     * @return array
      */
-    public function getUsers(int $filterId): TelegramUsers
+    public function getUsers(int $filterId): array
     {
         return TelegramUsers::find()
             ->where(['isActive' => 1])
-            ->andWhere(['NOT IN', 'id', [$filterId]])
+            ->andWhere(['NOT IN', 'id', $filterId])
             ->all();
     }
 }

@@ -5,7 +5,6 @@ namespace app\forms;
 use app\models\TelegramMessages;
 use TelegramBot\Api\Types\Chat;
 use TelegramBot\Api\Types\Message;
-use TelegramBot\Api\Types\Update;
 use yii\base\Model;
 
 final class FormMessages extends Model
@@ -39,24 +38,24 @@ final class FormMessages extends Model
     }
 
     /**
+     * @param int $idSmokeRequest
      * @return bool
      */
-    public function save(): bool
+    public function save(int $idSmokeRequest): bool
     {
         $message = $this->getMessage();
         $chat = $this->getChat();
 
         $model = new TelegramMessages();
-        $model->id = time();
+
+        $model->idSmokeRequest = $idSmokeRequest;
 
         $model->idMessage = $message->getMessageId();
         $model->text = $message->getText();
         $model->date = $message->getDate();
 
         $model->idChat = $chat->getId();
-        $model->type = $chat->getType();
 
-        //TODO: Добавить парсинг entities
         return ($model->validate() && $model->save());
     }
 
@@ -76,11 +75,4 @@ final class FormMessages extends Model
         return $this->message;
     }
 
-    /**
-     * @return Update
-     */
-    protected function getUpdate(): Update
-    {
-        return $this->update;
-    }
 }
